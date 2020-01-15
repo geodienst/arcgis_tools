@@ -185,7 +185,7 @@ class FieldResetter(object):
 class QuickAlias(object):
     def __init__(self):
         """Define the tool (tool name is the name of the class)."""
-        self.label = "1 QuickAlias"
+        self.label = "QuickAlias"
         self.description = "Create Field aliases on the visible fields"
         self.canRunInBackground = False
 
