@@ -15,5 +15,7 @@ This tool has a simplified UI to set field Aliases for the Visible fields.
 # QuickPopup
 This tool creates a simple tabular popup for the visible fields. The field used for symbology gets an Arcade expression to force numeric values into Dutch number formatting and a no data value will be converted to a text message
 
+# Remarks
+* The Fields and popup info in the CIM are seem to be only accessible when they are not default. Modify the popup and fields one time manually in the ArcGIS Pro Project to force them to custom properties and then run the Tools
 
 
