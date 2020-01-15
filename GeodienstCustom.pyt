@@ -294,7 +294,17 @@ class QuickPopup(object):
             parameterType="Required",
             direction="Input")
         nodata.value= "Data nog niet bekend"
-        params = [ inmap, layer, decimals, nodata]
+        
+        title = arcpy.Parameter(
+            displayName="Popup title",
+            name="title",
+            datatype="GPString",
+            parameterType="Required",
+            direction="Input")
+        title.filter.type = "ValueList"
+        title.filter.list = []
+        title.multiValue = False
+        params = [ inmap, layer, decimals, nodata, title]
         return params
 
     def isLicensed(self):
@@ -305,6 +315,12 @@ class QuickPopup(object):
         """Modify the values and properties of parameters before internal
         validation is performed.  This method is called whenever a parameter
         has been changed."""
+        if parameters[0].valueAsText:
+            if parameters[1].valueAsText:
+                parameters[2].enabled = True
+                helper = Helper()
+                fields = helper.getFields(parameters[0].valueAsText, parameters[1].valueAsText, True)
+                parameters[4].filter.list = fields
         return
 
     def updateMessages(self, parameters):
@@ -323,7 +339,10 @@ class QuickPopup(object):
         nodata = parameters[3].value
         decimals = "0"* parameters[2].value
         hasdecimals = "." if parameters[2].value >0 else ""
-        pi = cim_lyr.popupInfo
+        
+        if cim_lyr.popupInfo is None:
+            arcpy.AddWarning("Popup info is none")
+            cim_lyr.popupInfo = arcpy.cim.CIMVectorLayers.CIMPopupInfo()
         fields = [] 
         for fd in cim_lyr.featureTable.fieldDescriptions:
             if fd.fieldName == cim_lyr.renderer.field:
@@ -334,8 +353,8 @@ class QuickPopup(object):
                 expression = 'if ($feature.' + fd.fieldName + ' == 999999999){\nreturn "'+ nodata +'"}\nelse{\nreturn  Replace(Replace(Replace(Text($feature.' + fd.fieldName + ', "###,###,###'+ hasdecimals + decimals +'"),".","*"),",","."),"*",",")\n}'
                 arcpy.AddMessage("field expression = " + expression)
                 exinfo.expression = expression
-                pi.expressionInfos.clear()
-                pi.expressionInfos.append(exinfo)
+                cim_lyr.popupInfo.expressionInfos.clear()
+                cim_lyr.popupInfo.expressionInfos.append(exinfo)
                 fields.append(r'expression/' + exinfo.name )
                 layer.setDefinition(cim_lyr)
             else:
@@ -343,7 +362,14 @@ class QuickPopup(object):
                     fields.append(fd.fieldName)
                     arcpy.AddMessage("field visible in popup = " + fd.fieldName)
             
-        tablemediainfo = pi.mediaInfos[0]
+        if len(cim_lyr.popupInfo.mediaInfos) >0:
+            cim_lyr.popupInfo.mediaInfos[0].fields = fields
+        else:
+            arcpy.AddWarning("Table media info is none")
+            tablemediainfo = arcpy.cim.CIMVectorLayers.CIMTableMediaInfo()
         tablemediainfo.fields = fields
+            cim_lyr.popupInfo.mediaInfos.append(tablemediainfo)
+        cim_lyr.popupInfo.title = '{' + parameters[4].value + '}' 
+        cim_lyr.featureTable.displayField = parameters[4].value
         layer.setDefinition(cim_lyr)
         return
