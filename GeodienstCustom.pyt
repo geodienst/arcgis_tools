@@ -22,11 +22,14 @@ class Helper(object):
         layer  = lyrs[0]
         cim_lyr = layer.getDefinition('V2')
         fields = []
+        if len(cim_lyr.featureTable.fieldDescriptions) >0:
         for fd in cim_lyr.featureTable.fieldDescriptions:
             if not onlyVisible:
                 fields.append(fd.fieldName)
             elif fd.visible:
                 fields.append(fd.fieldName)
+        else:
+            arcpy.AddError("Field descriptions in CIM are default")
         return fields
         
     def getFieldsAndAliases(self,mapname, layername, onlyVisible=False):
@@ -106,8 +109,13 @@ class FieldOptimizer(object):
         layer  = lyrs[0]
         cim_lyr = layer.getDefinition('V2')
         fields = []
+        if len(cim_lyr.featureTable.fieldDescriptions) == 0:
+            arcpy.AddError("Field descriptions in CIM are default")
         for fd in cim_lyr.featureTable.fieldDescriptions:
             if fd.fieldName == cim_lyr.renderer.field:
+                arcpy.AddMessage("{0} is visible".format(fd.fieldName))
+                fd.visible = True
+            elif fd.fieldName.upper() == "SHAPE":
                 arcpy.AddMessage("{0} is visible".format(fd.fieldName))
                 fd.visible = True
             elif fd.fieldName in parameters[2].values:
