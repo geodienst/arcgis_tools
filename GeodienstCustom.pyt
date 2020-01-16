@@ -23,11 +23,11 @@ class Helper(object):
         cim_lyr = layer.getDefinition('V2')
         fields = []
         if len(cim_lyr.featureTable.fieldDescriptions) >0:
-        for fd in cim_lyr.featureTable.fieldDescriptions:
-            if not onlyVisible:
-                fields.append(fd.fieldName)
-            elif fd.visible:
-                fields.append(fd.fieldName)
+            for fd in cim_lyr.featureTable.fieldDescriptions:
+                if not onlyVisible:
+                    fields.append(fd.fieldName)
+                elif fd.visible:
+                    fields.append(fd.fieldName)
         else:
             arcpy.AddError("Field descriptions in CIM are default")
         return fields
@@ -250,6 +250,7 @@ class QuickAlias(object):
         layer  = lyrs[0]
         cim_lyr = layer.getDefinition('V2')
         fields = []
+            
         for fd in cim_lyr.featureTable.fieldDescriptions:
             for value in parameters[2].values:
                 if value[0] == fd.fieldName and value[1] != "":
@@ -361,13 +362,13 @@ class QuickPopup(object):
                 if fd.visible:
                     fields.append(fd.fieldName)
                     arcpy.AddMessage("field visible in popup = " + fd.fieldName)
-            
+        
         if len(cim_lyr.popupInfo.mediaInfos) >0:
             cim_lyr.popupInfo.mediaInfos[0].fields = fields
         else:
             arcpy.AddWarning("Table media info is none")
             tablemediainfo = arcpy.cim.CIMVectorLayers.CIMTableMediaInfo()
-        tablemediainfo.fields = fields
+            tablemediainfo.fields = fields
             cim_lyr.popupInfo.mediaInfos.append(tablemediainfo)
         cim_lyr.popupInfo.title = '{' + parameters[4].value + '}' 
         cim_lyr.featureTable.displayField = parameters[4].value
