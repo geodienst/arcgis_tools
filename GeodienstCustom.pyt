@@ -351,7 +351,7 @@ class QuickPopup(object):
                 exinfo.name =  'FormattedNumber'
                 exinfo.title = fd.alias if fd.alias is not None and fd.alias !="" else fd.fieldName
                 exinfo.returnType = 'String'
-                expression = 'if ($feature.' + fd.fieldName + ' == 999999999){\nreturn "'+ nodata +'"}\nelse{\nreturn  Replace(Replace(Replace(Text($feature.' + fd.fieldName + ', "###,###,###'+ hasdecimals + decimals +'"),".","*"),",","."),"*",",")\n}'
+                expression = 'if ($feature.' + fd.fieldName + ' == 999999999){\nreturn "'+ nodata +'"}\nelse{\nif (Text(1.1, "#.0") == "1.1"){\nreturn  Replace(Replace(Replace(Text($feature.' + fd.fieldName + ', "###,###,###'+ hasdecimals + decimals +'"),".","*"),",","."),"*",",")\n}\nelse{\nreturn Text($feature.' + fd.fieldName + ', "###,###,###'+ hasdecimals + decimals +'")\n}\n}'
                 arcpy.AddMessage("field expression = " + expression)
                 exinfo.expression = expression
                 cim_lyr.popupInfo.expressionInfos.clear()
